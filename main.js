@@ -289,3 +289,8 @@ document.addEventListener('pointerdown', function (e) {
   setTimeout(() => { ripple.style.opacity = '0'; }, 350);
   setTimeout(() => ripple.remove(), 700);
 });
+// Call after products are inserted into DOM
+document.querySelectorAll('.product-card').forEach((el, i) => {
+  el.style.animationDelay = (i * 70) + 'ms';
+  el.classList.add('enter');
+});
