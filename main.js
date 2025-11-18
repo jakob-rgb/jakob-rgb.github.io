@@ -1,296 +1,488 @@
-// main.js — static mode with localStorage, admin (password), image URLs
-const ADMIN_PASSWORD = "toutouadmin"; // change if you want (only local)
-const STORAGE_KEYS = { PRODUCTS: "tt_products_v1", CART: "tt_cart_v1", ORDERS: "tt_orders_v1" };
 
-// --- Seed products if none exist ---
-const defaultProducts = [
-  { id: 1, name: "Test1", price: 5.00, img: "" },
-  { id: 2, name: "Test2", price: 8.00, img: "" },
-  { id: 3, name: "Test3", price: 4.00, img: "" }
-];
+// main.js — rewritten, safer, nicer UX/effects
+(function () {
+  'use strict';
 
-function readProducts(){
-  const raw = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-  if(!raw){
-    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(defaultProducts));
-    return defaultProducts.slice();
+  // ----- Config -----
+  const ADMIN_PASSWORD = 'toutouadmin';
+  const STORAGE_KEYS = {
+    PRODUCTS: 'tt_products_v2',
+    CART: 'tt_cart_v2',
+    ORDERS: 'tt_orders_v2'
+  };
+
+  // ----- Defaults -----
+  const defaultProducts = [
+    { id: 1, name: 'Baklawa', price: 5.0, img: '' },
+    { id: 2, name: 'Makroud', price: 8.0, img: '' },
+    { id: 3, name: 'Mekroud', price: 4.0, img: '' }
+  ];
+
+  // ----- Utilities -----
+  const fmtNum = n => Number(n || 0).toFixed(2);
+  const localeFormatter = new Intl.NumberFormat('fr-TN', { style: 'currency', currency: 'TND', minimumFractionDigits: 2 });
+  const currency = n => {
+    try { return localeFormatter.format(Number(n)); }
+    catch (e) { return fmtNum(n) + ' TND'; }
+  };
+  const round2 = n => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+  // Safe DOM helpers
+  function el(tag, opts = {}, children = []) {
+    const node = document.createElement(tag);
+    Object.entries(opts).forEach(([k, v]) => {
+      if (k === 'cls') node.className = v;
+      else if (k === 'html') node.innerHTML = v;
+      else if (k === 'text') node.textContent = v;
+      else if (k === 'attrs') Object.entries(v).forEach(([a, val]) => node.setAttribute(a, val));
+      else node[k] = v;
+    });
+    (Array.isArray(children) ? children : [children]).forEach(c => {
+      if (!c) return;
+      node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    });
+    return node;
   }
-  try { return JSON.parse(raw); } catch { return defaultProducts.slice(); }
-}
-function saveProducts(products){ localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products)); }
 
-let products = readProducts();
-let cart = JSON.parse(localStorage.getItem(STORAGE_KEYS.CART) || "[]");
+  // ----- Storage -----
+  function readProducts() {
+    const raw = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(defaultProducts));
+      return defaultProducts.map(p => ({ ...p }));
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) throw new Error('Invalid products');
+      return parsed;
+    } catch {
+      // fallback to defaults
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(defaultProducts));
+      return defaultProducts.map(p => ({ ...p }));
+    }
+  }
+  function saveProducts(products) {
+    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+  }
+  function readCart() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.CART) || '[]';
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  function persistCart(cart) {
+    localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
+  }
 
-// Helpers
-function fmt(n){ return Number(n).toFixed(2); }
-function currency(n){ return fmt(n) + " TND"; }
+  // ----- State -----
+  let products = readProducts();
+  let cart = readCart();
 
-// DOM refs
-const productsEl = document.getElementById("products");
-const cartBody = document.getElementById("cartBody");
-const grandTotalEl = document.getElementById("grandTotal");
-const checkoutItems = document.getElementById("checkoutItems");
-const checkoutTotal = document.getElementById("checkoutTotal");
-const adminBtn = document.getElementById("adminBtn");
-const adminModalEl = new bootstrap.Modal(document.getElementById("adminModal"));
-const checkoutModalEl = new bootstrap.Modal(document.getElementById("checkoutModal"));
-const orderConfirmEl = document.getElementById("orderConfirm");
+  // ----- DOM refs -----
+  const productsEl = document.getElementById('products');
+  const cartBody = document.getElementById('cartBody');
+  const grandTotalEl = document.getElementById('grandTotal');
+  const checkoutItemsEl = document.getElementById('checkoutItems');
+  const checkoutTotalEl = document.getElementById('checkoutTotal');
+  const adminBtn = document.getElementById('adminBtn');
+  const adminListEl = document.getElementById('adminList');
+  const searchInput = document.getElementById('searchInput');
+  const sortSelect = document.getElementById('sortSelect');
+  const orderConfirmEl = document.getElementById('orderConfirm');
 
-// Render
-function renderProducts(list = products){
-  // optional search/sort
-  const query = document.getElementById("searchInput")?.value?.toLowerCase() || "";
-  const sort = document.getElementById("sortSelect")?.value || "default";
+  const adminModalElem = document.getElementById('adminModal');
+  const checkoutModalElem = document.getElementById('checkoutModal');
+  const bootstrapModal = window.bootstrap && window.bootstrap.Modal;
+  const adminModal = bootstrapModal ? new bootstrapModal(adminModalElem) : null;
+  const checkoutModal = bootstrapModal ? new bootstrapModal(checkoutModalElem) : null;
 
-  let out = list.filter(p => p.name.toLowerCase().includes(query));
+  // Accessibility: announce area for cart updates
+  let liveRegion = document.getElementById('cartLiveRegion');
+  if (!liveRegion) {
+    liveRegion = el('div', { attrs: { id: 'cartLiveRegion', 'aria-live': 'polite', 'aria-atomic': 'true', style: 'position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;' }});
+    document.body.appendChild(liveRegion);
+  }
 
-  if(sort === "price-asc") out.sort((a,b)=>a.price-b.price);
-  if(sort === "price-desc") out.sort((a,b)=>b.price-a.price);
-  if(sort === "name-asc") out.sort((a,b)=>a.name.localeCompare(b.name));
+  // ----- Rendering -----
+  function clearChildren(node) {
+    while (node.firstChild) node.removeChild(node.firstChild);
+  }
 
-  productsEl.innerHTML = out.map(p => `
-    <div class="col-12 col-sm-6 col-md-4">
-      <div class="product-card">
-        ${p.img ? `<img src="${p.img}" alt="${escapeHtml(p.name)}">` : `<div style="height:140px;display:flex;align-items:center;justify-content:center;color:#bbb">No image</div>`}
-        <h5 class="mb-1">${escapeHtml(p.name)}</h5>
-        <p class="mb-2 fw-semibold">${fmt(p.price)} TND</p>
-        <div class="d-grid gap-2">
-          <button class="btn btn-primary btn-sm" onclick="addToCart(${p.id})">Add to cart</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-  attachSearchListeners();
-}
-function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function renderProducts(filtered = null) {
+    // apply search and sort
+    const q = (searchInput?.value || '').trim().toLowerCase();
+    const sort = sortSelect?.value || 'default';
+    let list = Array.isArray(filtered) ? filtered.slice() : products.slice();
 
-// CART functions
-function persistCart(){ localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart)); }
+    if (q.length) {
+      list = list.filter(p => p.name.toLowerCase().includes(q));
+    }
+    if (sort === 'price-asc') list.sort((a, b) => a.price - b.price);
+    else if (sort === 'price-desc') list.sort((a, b) => b.price - a.price);
+    else if (sort === 'name-asc') list.sort((a, b) => a.name.localeCompare(b.name));
 
-function addToCart(id){
-  const prod = products.find(p=>p.id===id);
-  if(!prod) return alert("Product not found");
-  const item = cart.find(i=>i.id===id);
-  if(item) item.qty++;
-  else cart.push({ id: prod.id, name: prod.name, price: Number(prod.price), qty: 1 });
-  persistCart(); renderCart();
-  // small feedback
-  showToast(`${prod.name} added`);
-}
+    clearChildren(productsEl);
 
-function removeFromCart(id){
-  cart = cart.filter(i => i.id !== id);
-  persistCart(); renderCart();
-}
+    if (!list.length) {
+      productsEl.appendChild(el('div', { cls: 'text-center small text-muted', text: 'No products found' }));
+      return;
+    }
 
-function changeQty(id, val){
-  const item = cart.find(i=>i.id===id);
-  if(!item) return;
-  const q = parseInt(val) || 1;
-  item.qty = Math.max(1,q);
-  persistCart(); renderCart();
-}
+    // create grid using columns similar to bootstrap layout; keep markup compact
+    list.forEach((p, idx) => {
+      const col = el('div', { cls: 'col-12 col-sm-6 col-md-4' });
+      const card = el('div', { cls: 'product-card', attrs: { 'data-id': String(p.id), role: 'group' } });
 
-function renderCart(){
-  cartBody.innerHTML = "";
-  let total = 0;
-  if(cart.length===0){
-    cartBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Cart is empty</td></tr>`;
-  } else {
-    cart.forEach(it => {
-      const line = round2(it.price * it.qty);
-      total += line;
-      cartBody.innerHTML += `
-        <tr>
-          <td style="min-width:120px">${escapeHtml(it.name)}</td>
-          <td class="text-end">${fmt(it.price)} TND</td>
-          <td style="width:95px">
-            <input class="form-control form-control-sm" type="number" min="1" value="${it.qty}" onchange="changeQty(${it.id}, this.value)"/>
-          </td>
-          <td class="text-end">${fmt(line)} TND</td>
-          <td><button class="btn btn-sm btn-danger" onclick="removeFromCart(${it.id})">Remove</button></td>
-        </tr>
-      `;
+      const priceBadge = el('div', { cls: 'price-badge', text: fmtNum(p.price) + ' TND' });
+
+      const imgWrapper = el('div', { cls: 'product-image-wrapper' });
+      if (p.img) {
+        const img = el('img', { attrs: { src: p.img, alt: p.name } });
+        img.className = 'product-img';
+        img.style.maxWidth = '100%';
+        img.style.height = '150px';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '10px';
+        imgWrapper.appendChild(img);
+      } else {
+        const placeholder = el('div', { cls: 'text-muted', text: 'No image' });
+        placeholder.style.height = '150px';
+        placeholder.style.display = 'flex';
+        placeholder.style.alignItems = 'center';
+        placeholder.style.justifyContent = 'center';
+        imgWrapper.appendChild(placeholder);
+      }
+
+      const title = el('h5', { cls: 'mb-1 title', text: p.name });
+      const meta = el('p', { cls: 'mb-2 desc small-muted', text: currency(p.price) });
+
+      const addBtn = el('button', { cls: 'btn btn-cta btn-sm', type: 'button', text: 'Add to cart' });
+      addBtn.addEventListener('click', () => addToCart(p.id));
+
+      const ctaWrap = el('div', { cls: 'd-grid gap-2' }, addBtn);
+
+      card.appendChild(priceBadge);
+      card.appendChild(imgWrapper);
+      card.appendChild(title);
+      card.appendChild(meta);
+      card.appendChild(ctaWrap);
+
+      col.appendChild(card);
+      productsEl.appendChild(col);
+
+      // staggered reveal
+      setTimeout(() => card.classList.add('enter'), idx * 70);
     });
   }
-  grandTotalEl.innerText = currency(round2(total));
-}
 
-function round2(n){ return Math.round((n+Number.EPSILON) * 100) / 100; }
+  function renderCart() {
+    clearChildren(cartBody);
+    let total = 0;
 
-// CHECKOUT
-function prepareCheckout(){
-  if(cart.length===0){
-    checkoutItems.innerHTML = `<div class="text-center text-muted">Cart empty</div>`;
-    checkoutTotal.innerText = currency(0);
-    return;
+    if (!cart.length) {
+      const tr = el('tr');
+      const td = el('td', { cls: 'text-center text-muted', attrs: { colspan: '5' }, text: 'Cart is empty' });
+      tr.appendChild(td);
+      cartBody.appendChild(tr);
+      grandTotalEl.textContent = currency(0);
+      liveRegion.textContent = 'Cart is empty';
+      return;
+    }
+
+    cart.forEach(item => {
+      const tr = el('tr');
+
+      const tdName = el('td', {}, el('div', { text: item.name }));
+      const tdPrice = el('td', { cls: 'text-end' }, el('div', { text: currency(item.price) }));
+      const tdQty = el('td', { attrs: { style: 'width:95px' } });
+      const qtyInput = el('input', { cls: 'form-control form-control-sm', type: 'number' });
+      qtyInput.min = '1';
+      qtyInput.value = String(item.qty);
+      qtyInput.addEventListener('change', () => changeQty(item.id, qtyInput.value));
+      tdQty.appendChild(qtyInput);
+      const line = round2(item.price * item.qty);
+      const tdLine = el('td', { cls: 'text-end', text: currency(line) });
+      const tdActions = el('td');
+      const delBtn = el('button', { cls: 'btn btn-sm btn-danger', type: 'button', text: 'Remove' });
+      delBtn.addEventListener('click', () => removeFromCart(item.id));
+      tdActions.appendChild(delBtn);
+
+      tr.appendChild(tdName);
+      tr.appendChild(tdPrice);
+      tr.appendChild(tdQty);
+      tr.appendChild(tdLine);
+      tr.appendChild(tdActions);
+      cartBody.appendChild(tr);
+
+      total += line;
+    });
+
+    total = round2(total);
+    grandTotalEl.textContent = currency(total);
+    liveRegion.textContent = `Cart updated. Total ${currency(total)}`;
   }
-  checkoutItems.innerHTML = cart.map(i=>`<div class="d-flex justify-content-between"><span>${i.qty} × ${escapeHtml(i.name)}</span><span>${fmt(i.price*i.qty)} TND</span></div>`).join("");
-  const tot = cart.reduce((s,i)=>s + (i.price * i.qty), 0);
-  checkoutTotal.innerText = currency(round2(tot));
-}
 
-// FINALIZE ORDER
-function finalizeOrder(){
-  if(cart.length===0){ alert("Cart is empty"); return; }
-  // save order to local orders (history)
-  const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || "[]");
-  const newOrder = {
-    id: Date.now(),
-    date: new Date().toISOString(),
-    items: cart.slice(),
-    total: round2(cart.reduce((s,i)=>s + i.price*i.qty, 0))
-  };
-  orders.push(newOrder);
-  localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+  // ----- Cart operations -----
+  function addToCart(id) {
+    const prod = products.find(p => Number(p.id) === Number(id));
+    if (!prod) {
+      showToast('Product not found');
+      return;
+    }
+    const existing = cart.find(i => Number(i.id) === Number(id));
+    if (existing) existing.qty = Math.max(1, Number(existing.qty) + 1);
+    else cart.push({ id: prod.id, name: prod.name, price: round2(prod.price), qty: 1 });
+    persistCart(cart);
+    renderCart();
+    showToast(`${prod.name} added`);
+  }
 
-  // clear cart
-  cart = []; persistCart(); renderCart();
-  checkoutModalEl.hide();
+  function removeFromCart(id) {
+    cart = cart.filter(i => Number(i.id) !== Number(id));
+    persistCart(cart);
+    renderCart();
+    showToast('Removed');
+  }
 
-  // show animation
-  orderConfirmEl.classList.add("show");
-  setTimeout(()=> orderConfirmEl.classList.remove("show"), 1900);
+  function changeQty(id, val) {
+    const item = cart.find(i => Number(i.id) === Number(id));
+    if (!item) return;
+    const q = Math.max(1, parseInt(val) || 1);
+    item.qty = q;
+    persistCart(cart);
+    renderCart();
+  }
 
-  alert("Order saved locally. Call 27441307 to confirm.");
-}
+  // ----- Checkout -----
+  function prepareCheckout() {
+    clearChildren(checkoutItemsEl);
+    if (!cart.length) {
+      checkoutItemsEl.appendChild(el('div', { cls: 'text-center text-muted', text: 'Cart empty' }));
+      checkoutTotalEl.textContent = currency(0);
+      return;
+    }
+    cart.forEach(i => {
+      const row = el('div', { cls: 'd-flex justify-content-between' });
+      row.appendChild(el('span', { text: `${i.qty} × ${i.name}` }));
+      row.appendChild(el('span', { text: currency(i.price * i.qty) }));
+      checkoutItemsEl.appendChild(row);
+    });
+    const tot = round2(cart.reduce((s, it) => s + it.price * it.qty, 0));
+    checkoutTotalEl.textContent = currency(tot);
+    if (checkoutModal) checkoutModal.show();
+  }
 
-// Simple toast (small floating message)
-let toastTimer;
-function showToast(text){
-  let el = document.createElement("div");
-  el.className = "toast-bubble";
-  el.innerText = text;
-  document.body.appendChild(el);
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>{ el.classList.add("hide"); setTimeout(()=>el.remove(),400); }, 1100);
-}
+  function finalizeOrder() {
+    if (!cart.length) { alert('Cart is empty'); return; }
+    const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
+    const newOrder = {
+      id: uid(),
+      date: new Date().toISOString(),
+      items: cart.map(i => ({ ...i })),
+      total: round2(cart.reduce((s, it) => s + it.price * it.qty, 0))
+    };
+    orders.push(newOrder);
+    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+    cart = [];
+    persistCart(cart);
+    renderCart();
+    if (checkoutModal) checkoutModal.hide();
+    // show confirmation overlay
+    orderConfirmEl.classList.add('show');
+    setTimeout(() => orderConfirmEl.classList.remove('show'), 2000);
+    showToast('Order saved locally. Call 27441307 to confirm.');
+  }
 
-// ADMIN (password prompt)
-adminBtn.addEventListener("click", async ()=>{
-  const pass = prompt("Admin password:");
-  if(pass === ADMIN_PASSWORD){
+  // ----- Admin UI -----
+  function populateAdminList() {
+    clearChildren(adminListEl);
+    if (!products.length) {
+      adminListEl.appendChild(el('div', { cls: 'text-center text-muted', text: 'No products yet' }));
+      return;
+    }
+    products.forEach(p => {
+      const item = el('div', { cls: 'list-group-item d-flex align-items-center justify-content-between' });
+      const left = el('div', { cls: 'd-flex align-items-center' });
+
+      if (p.img) {
+        const img = el('img', { attrs: { src: p.img, alt: p.name }});
+        img.style.height = '48px'; img.style.width = '48px'; img.style.objectFit = 'cover'; img.style.borderRadius = '6px'; img.style.marginRight = '12px';
+        left.appendChild(img);
+      } else {
+        const placeholder = el('div', { cls: 'text-muted', text: '—' });
+        placeholder.style.width = '48px'; placeholder.style.height = '48px'; placeholder.style.display = 'flex';
+        placeholder.style.alignItems = 'center'; placeholder.style.justifyContent = 'center';
+        placeholder.style.background = '#f0f0f0'; placeholder.style.borderRadius = '6px'; placeholder.style.marginRight = '12px';
+        left.appendChild(placeholder);
+      }
+
+      const info = el('div', {});
+      info.appendChild(el('div', { cls: 'fw-bold ms-2', text: p.name }));
+      info.appendChild(el('div', { cls: 'text-muted ms-2', text: currency(p.price) }));
+
+      left.appendChild(info);
+      item.appendChild(left);
+
+      const right = el('div', {});
+      const editBtn = el('button', { cls: 'btn btn-sm btn-outline-primary me-2', type: 'button', text: 'Edit' });
+      editBtn.addEventListener('click', () => openEdit(p.id));
+      const delBtn = el('button', { cls: 'btn btn-sm btn-outline-danger', type: 'button', text: 'Delete' });
+      delBtn.addEventListener('click', () => deleteProduct(p.id));
+      right.appendChild(editBtn);
+      right.appendChild(delBtn);
+
+      item.appendChild(right);
+      adminListEl.appendChild(item);
+    });
+  }
+
+  function addProductFromAdmin() {
+    const nameInput = document.getElementById('newName');
+    const priceInput = document.getElementById('newPrice');
+    const imageInput = document.getElementById('newImage');
+    const name = (nameInput?.value || '').trim();
+    const price = parseFloat(priceInput?.value);
+    const img = (imageInput?.value || '').trim();
+
+    if (!name || Number.isNaN(price)) {
+      alert('Enter a valid name and price');
+      return;
+    }
+    const id = Date.now();
+    products.push({ id, name, price: round2(price), img });
+    saveProducts(products);
+
+    if (nameInput) nameInput.value = '';
+    if (priceInput) priceInput.value = '';
+    if (imageInput) imageInput.value = '';
+
+    renderProducts();
     populateAdminList();
-    adminModalEl.show();
-  } else {
-    if(pass !== null) alert("Wrong password");
+    showToast('Product added');
   }
-});
 
-// Admin actions: add/edit/delete
-function populateAdminList(){
-  const list = document.getElementById("adminList");
-  list.innerHTML = "";
-  products.forEach(p=>{
-    const item = document.createElement("div");
-    item.className = "list-group-item d-flex align-items-center justify-content-between";
-    item.innerHTML = `
-      <div class="d-flex align-items-center">
-        ${p.img ? `<img src="${p.img}" alt="${escapeHtml(p.name)}">` : `<div style="width:48px;height:48px;background:#f0f0f0;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#bbb">No</div>`}
-        <div>
-          <div class="fw-bold ms-2">${escapeHtml(p.name)}</div>
-          <div class="text-muted ms-2">${fmt(p.price)} TND</div>
-        </div>
-      </div>
-      <div>
-        <button class="btn btn-sm btn-outline-primary me-2" onclick='openEdit(${p.id})'>Edit</button>
-        <button class="btn btn-sm btn-outline-danger" onclick='deleteProduct(${p.id})'>Delete</button>
-      </div>
-    `;
-    list.appendChild(item);
+  function openEdit(id) {
+    const p = products.find(x => Number(x.id) === Number(id));
+    if (!p) return;
+    const newName = prompt('Edit name:', p.name);
+    if (newName === null) return;
+    const newPriceRaw = prompt('Edit price (TND):', String(p.price));
+    if (newPriceRaw === null) return;
+    const newImg = prompt('Image URL (leave empty to keep):', p.img || '');
+
+    p.name = newName.trim() || p.name;
+    p.price = round2(Number(newPriceRaw) || p.price);
+    p.img = newImg === null ? p.img : newImg.trim();
+
+    saveProducts(products);
+    renderProducts();
+    populateAdminList();
+    showToast('Product updated');
+  }
+
+  function deleteProduct(id) {
+    if (!confirm('Delete this product?')) return;
+    products = products.filter(p => Number(p.id) !== Number(id));
+    saveProducts(products);
+    renderProducts();
+    populateAdminList();
+    showToast('Deleted');
+  }
+
+  // ----- Small UI helpers: toast + ripple ----- 
+  let toastTimer = null;
+  function showToast(text) {
+    const bubble = el('div', { cls: 'toast-bubble', text });
+    // basic styling if not provided by CSS
+    bubble.style.position = 'fixed';
+    bubble.style.left = '50%';
+    bubble.style.transform = 'translateX(-50%)';
+    bubble.style.bottom = '28px';
+    bubble.style.background = 'rgba(20,20,20,0.9)';
+    bubble.style.color = '#fff';
+    bubble.style.padding = '10px 14px';
+    bubble.style.borderRadius = '10px';
+    bubble.style.zIndex = 1100;
+    bubble.style.transition = 'opacity .28s';
+    document.body.appendChild(bubble);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      bubble.style.opacity = '0';
+      setTimeout(() => bubble.remove(), 250);
+    }, 1200);
+  }
+
+  // ripple effect (delegated)
+  document.addEventListener('pointerdown', function (e) {
+    const btn = e.target.closest('.btn-cta, .btn, .btn-primary, .btn-outline-primary, .btn-outline-danger');
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const r = Math.max(rect.width, rect.height) * 1.2;
+    const ripple = el('span', { cls: 'ripple-span' });
+    Object.assign(ripple.style, {
+      position: 'absolute',
+      left: (e.clientX - rect.left - r / 2) + 'px',
+      top: (e.clientY - rect.top - r / 2) + 'px',
+      width: r + 'px',
+      height: r + 'px',
+      background: 'rgba(255,255,255,0.18)',
+      borderRadius: '50%',
+      transform: 'scale(0)',
+      pointerEvents: 'none',
+      transition: 'transform .5s ease, opacity .5s ease',
+      zIndex: 2
+    });
+    btn.style.position = getComputedStyle(btn).position === 'static' ? 'relative' : getComputedStyle(btn).position;
+    btn.appendChild(ripple);
+    requestAnimationFrame(() => { ripple.style.transform = 'scale(1.8)'; });
+    setTimeout(() => { ripple.style.opacity = '0'; }, 350);
+    setTimeout(() => ripple.remove(), 700);
   });
-}
 
-// Add product from admin form
-window.addProductFromAdmin = function(){
-  const name = document.getElementById("newName").value.trim();
-  const price = parseFloat(document.getElementById("newPrice").value);
-  const img = document.getElementById("newImage").value.trim();
-  if(!name || isNaN(price)){ return alert("Enter name and price"); }
-  const id = Date.now();
-  products.push({ id, name, price: round2(price), img });
-  saveProducts(products);
-  document.getElementById("newName").value = "";
-  document.getElementById("newPrice").value = "";
-  document.getElementById("newImage").value = "";
-  renderProducts(); populateAdminList();
-  showToast("Product added");
-};
+  // ----- Event wiring -----
+  if (searchInput) searchInput.addEventListener('input', () => renderProducts());
+  if (sortSelect) sortSelect.addEventListener('change', () => renderProducts());
 
-// Edit product (simple prompt based edit)
-window.openEdit = function(id){
-  const p = products.find(x=>x.id===id);
-  if(!p) return;
-  const newName = prompt("Edit name:", p.name);
-  if(newName === null) return;
-  const newPrice = prompt("Edit price (TND):", p.price);
-  if(newPrice === null) return;
-  const newImg = prompt("Image URL (leave empty to keep):", p.img || "");
-  p.name = newName.trim() || p.name;
-  p.price = round2(Number(newPrice) || p.price);
-  p.img = (newImg === null) ? p.img : newImg.trim();
-  saveProducts(products);
-  renderProducts(); populateAdminList();
-  showToast("Product updated");
-};
+  if (adminBtn) {
+    adminBtn.addEventListener('click', () => {
+      const pass = prompt('Admin password:');
+      if (pass === ADMIN_PASSWORD) {
+        populateAdminList();
+        if (adminModal) adminModal.show();
+        else alert('Admin mode (modal not available).');
+      } else if (pass !== null) {
+        alert('Wrong password');
+      }
+    });
+  }
 
-window.deleteProduct = function(id){
-  if(!confirm("Delete this product?")) return;
-  products = products.filter(p=>p.id!==id);
-  saveProducts(products);
-  renderProducts(); populateAdminList();
-  showToast("Deleted");
-};
+  // Expose addProductFromAdmin for inline HTML button (keeps compatibility)
+  window.addProductFromAdmin = addProductFromAdmin;
 
-// Search / sort listeners
-function attachSearchListeners(){
-  const s = document.getElementById("searchInput");
-  const sort = document.getElementById("sortSelect");
-  if(s) s.oninput = ()=> renderProducts();
-  if(sort) sort.onchange = ()=> renderProducts();
-}
+  // Expose some other functions for compatibility with inline HTML (if used)
+  window.addToCart = addToCart;
+  window.removeFromCart = removeFromCart;
+  window.changeQty = changeQty;
+  window.prepareCheckout = prepareCheckout;
+  window.finalizeOrder = finalizeOrder;
 
-// Init
-function init(){
-  products = readProducts();
-  cart = JSON.parse(localStorage.getItem(STORAGE_KEYS.CART) || "[]");
-  renderProducts();
-  renderCart();
-}
-init();
+  // ----- Init -----
+  function init() {
+    products = readProducts();
+    cart = readCart();
+    renderProducts();
+    renderCart();
+  }
 
-// Expose some functions to window (used in HTML onclick)
-window.addToCart = addToCart;
-window.removeFromCart = removeFromCart;
-window.changeQty = changeQty;
-window.prepareCheckout = prepareCheckout;
-window.finalizeOrder = finalizeOrder;
-document.addEventListener('pointerdown', function (e) {
-  const btn = e.target.closest('.btn-cta, .btn, .btn-primary');
-  if (!btn) return;
-  const rect = btn.getBoundingClientRect();
-  const r = Math.max(rect.width, rect.height);
-  const ripple = document.createElement('span');
-  ripple.style.position = 'absolute';
-  ripple.style.left = (e.clientX - rect.left - r/2) + 'px';
-  ripple.style.top = (e.clientY - rect.top - r/2) + 'px';
-  ripple.style.width = ripple.style.height = r + 'px';
-  ripple.style.background = 'rgba(255,255,255,0.18)';
-  ripple.style.borderRadius = '50%';
-  ripple.style.transform = 'scale(0)';
-  ripple.style.pointerEvents = 'none';
-  ripple.style.transition = 'transform .5s ease, opacity .5s ease';
-  ripple.style.opacity = '1';
-  ripple.className = 'ripple-span';
-  btn.style.position = btn.style.position || 'relative';
-  btn.appendChild(ripple);
-  requestAnimationFrame(() => ripple.style.transform = 'scale(1.8)');
-  setTimeout(() => { ripple.style.opacity = '0'; }, 350);
-  setTimeout(() => ripple.remove(), 700);
-});
-// Call after products are inserted into DOM
-document.querySelectorAll('.product-card').forEach((el, i) => {
-  el.style.animationDelay = (i * 70) + 'ms';
-  el.classList.add('enter');
-});
+  // run init on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
