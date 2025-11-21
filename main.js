@@ -233,5 +233,39 @@
   // init
   function init(){ products = readProducts(); renderProducts(); renderCart(); }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+// CATEGORY FILTER + ANIMATION
+const catBtns = document.querySelectorAll('.cat-btn');
+const allSections = document.querySelectorAll('.section-grid');
 
+catBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    
+    // activate button
+    catBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const target = btn.dataset.target;
+
+    // hide all sections
+    allSections.forEach(sec => {
+      sec.classList.remove('visible');
+      sec.parentElement.style.display = 'none';
+    });
+
+    // show only selected section
+    const selectedSec = document.querySelector(`[data-section="${target}"]`);
+    selectedSec.parentElement.style.display = 'block';
+
+    // animate
+    setTimeout(() => selectedSec.classList.add('visible'), 50);
+
+    // smooth scroll
+    selectedSec.parentElement.scrollIntoView({ behavior: "smooth" });
+  });
+});
+
+// Show all when page loads
+window.addEventListener("DOMContentLoaded", () => {
+  allSections.forEach(sec => sec.classList.add("visible"));
+});
 })();
