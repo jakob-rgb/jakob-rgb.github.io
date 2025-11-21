@@ -268,4 +268,31 @@ catBtns.forEach(btn => {
 window.addEventListener("DOMContentLoaded", () => {
   allSections.forEach(sec => sec.classList.add("visible"));
 });
+// HORIZONTAL SLIDER CONTROL
+const slider = document.getElementById('sectionSlider');
+const pages = document.querySelectorAll('.slider-page');
+
+function goToPage(pageName) {
+  const index = [...pages].findIndex(p => p.dataset.page === pageName);
+  if (index === -1) return;
+
+  slider.style.transform = `translateX(-${index * 100}%)`;
+
+  pages.forEach(p => p.classList.remove('active'));
+  pages[index].classList.add('active');
+}
+
+// category button clicks
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    goToPage(btn.dataset.target);
+  });
+});
+
+// default
+window.addEventListener("DOMContentLoaded", () => {
+  goToPage("les-gateau");
+});
 })();
