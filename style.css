@@ -183,3 +183,43 @@ body{
   .site-title{font-size:1.3rem}
   .logo-img{height:46px}
 }
+/* CATEGORY NAV */
+.category-nav {
+  background: #ffffffaa;
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 900;
+}
+
+.cat-btn {
+  border: none;
+  padding: 8px 18px;
+  border-radius: 12px;
+  font-weight: 500;
+  background: #ffe0d1;
+  transition: 0.25s;
+}
+
+.cat-btn:hover {
+  background: #ffb088;
+  transform: translateY(-2px);
+}
+
+.cat-btn.active {
+  background: var(--accent-1);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* SECTION ANIMATION */
+.section-grid {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .4s ease, transform .4s ease;
+}
+
+.section-grid.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
