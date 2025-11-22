@@ -5,14 +5,14 @@
   const STORAGE_KEYS = { PRODUCTS: 'tt_products_v2', CART: 'tt_cart_v2', ORDERS: 'tt_orders_v2' };
 
   const defaultProducts = [
-    { id: 1, name: 'Baklawa classique', price: 6.50, img: 'images/baklawa.jpg', category: 'les-gateau' },
-    { id: 2, name: 'Opéra gâteau', price: 12.00, img: 'images/opera.jpg', category: 'les-gateau' },
-    { id: 3, name: 'Makroud', price: 4.00, img: 'images/makroud.jpg', category: 'halawa-arabi' },
-    { id: 4, name: 'Zlabia', price: 3.50, img: 'images/zlabia.jpg', category: 'halawa-arabi' },
-    { id: 5, name: 'Orange Juice', price: 2.50, img: 'images/juice-orange.jpg', category: 'juice' },
-    { id: 6, name: 'Mixed Fruit Juice', price: 3.20, img: 'images/juice-mix.jpg', category: 'juice' },
-    { id: 7, name: 'Gateau soirée (chocolat)', price: 15.00, img: 'images/soiree-choco.jpg', category: 'gateau-soiree' },
-    { id: 8, name: 'Gateau soirée (vanille)', price: 14.00, img: 'images/soiree-vanille.jpg', category: 'gateau-soiree' }
+    { id: 1, name: '', price: 6.50, img: 'images/baklawa.jpg', category: 'les-gateau' },
+    { id: 2, name: '', price: 12.00, img: 'images/opera.jpg', category: 'les-gateau' },
+    { id: 3, name: 'test1', price: 4.00, img: 'images/makroud.jpg', category: 'halawa-arabi' },
+    { id: 4, name: 'test', price: 3.50, img: 'images/zlabia.jpg', category: 'halawa-arabi' },
+    { id: 5, name: 'test', price: 2.50, img: 'images/juice-orange.jpg', category: 'juice' },
+    { id: 6, name: 'test', price: 3.20, img: 'images/juice-mix.jpg', category: 'juice' },
+    { id: 7, name: 'test (chocolat)', price: 15.00, img: 'images/soiree-choco.jpg', category: 'gateau-soiree' },
+    { id: 8, name: 'test (vanille)', price: 14.00, img: 'images/soiree-vanille.jpg', category: 'gateau-soiree' }
   ];
 
   function readProducts() {
