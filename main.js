@@ -5,7 +5,7 @@
   const STORAGE_KEYS = { PRODUCTS: 'tt_products_v2', CART: 'tt_cart_v2', ORDERS: 'tt_orders_v2' };
 
   const defaultProducts = [
-    { id: 1, name: '', price: 6.50, img: 'images/baklawa.jpg', category: 'les-gateau' },
+    { id: 1, name: 'Gâteau aux chocolat ', price: 40.50, img: 'images/Gt Chocolat.jpg', category: 'les-gateau' },
     { id: 2, name: '', price: 12.00, img: 'images/opera.jpg', category: 'les-gateau' },
     { id: 3, name: 'test1', price: 4.00, img: 'images/makroud.jpg', category: 'halawa-arabi' },
     { id: 4, name: 'test', price: 3.50, img: 'images/zlabia.jpg', category: 'halawa-arabi' },
