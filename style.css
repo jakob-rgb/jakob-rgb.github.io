@@ -1,119 +1,50 @@
-/* ---------- GLOBAL ---------- */
-body {
-  font-family: 'Roboto', sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #f9f9f9;
-  color: #333;
-}
-
-h1, h2, h3, h4, h5 {
-  margin: 0;
-  font-family: 'Pacifico', cursive;
-}
-
-.container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 0 15px;
-}
-
-/* ---------- HEADER ---------- */
-.site-header {
-  background: #ff8c42;
-  color: #fff;
-  padding: 12px 0;
-}
-
-.site-header .logo-img {
-  height: 60px;
-  margin-right: 12px;
-}
-
-.site-title {
-  font-size: 1.8rem;
-  font-weight: 500;
-}
-
-/* ---------- CATEGORY NAV ---------- */
-.category-nav {
-  display: flex;
-  gap: 8px;
-}
-
-.cat-btn {
-  background: #fff;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: 0.2s;
-}
-
-.cat-btn.active, .cat-btn:hover {
-  background: #ffd07f;
-}
-
-/* ---------- SEARCH & SORT ---------- */
-#searchInput {
-  flex: 1;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-#sortSelect {
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
 /* ---------- PRODUCT CARDS ---------- */
 .section-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
   margin-top: 15px;
+  justify-content: center; /* center the cards */
 }
 
 .product-card {
-  flex: 1 1 calc(33.333% - 20px); /* 3 cards per row */
+  flex: 1 1 300px;       /* min width 300px, will expand */
+  max-width: 350px;      /* max width */
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px;
+  padding: 16px;
   transition: transform 0.2s;
 }
 
 .product-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
 }
 
 .product-card img {
   width: 100%;
-  height: 180px;
+  height: 250px;       /* taller image */
   object-fit: cover;
   border-radius: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .product-card h5 {
-  font-size: 1.1rem;
-  margin-bottom: 6px;
+  font-size: 1.3rem;   /* bigger title */
+  margin-bottom: 8px;
   text-align: center;
 }
 
 .product-card .price-badge {
   background: #ffbf69;
   color: #333;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 6px 12px;  /* bigger badge */
+  border-radius: 8px;
   font-weight: 500;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .btn-cta {
@@ -121,10 +52,11 @@ h1, h2, h3, h4, h5 {
   background: #ff8c42;
   color: #fff;
   border: none;
-  padding: 6px 0;
-  border-radius: 6px;
+  padding: 10px 0;    /* bigger button */
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
+  font-size: 1rem;    /* larger text */
   transition: 0.2s;
 }
 
@@ -132,74 +64,17 @@ h1, h2, h3, h4, h5 {
   background: #ff9f5a;
 }
 
-/* ---------- CART ---------- */
-#cartContainer {
-  background: #fff;
-  border-radius: 12px;
-  padding: 12px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-  margin-top: 20px;
-}
-
-#cartBody input {
-  width: 60px;
-  text-align: center;
-}
-
-/* ---------- MODAL ---------- */
-.modal-content {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.modal-header.bg-warning {
-  background: #ff8c42 !important;
-  color: #fff !important;
-}
-
-/* ---------- ORDER CONFIRM ---------- */
-.order-confirm {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  background: #fff;
-  padding: 30px 40px;
-  border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-  text-align: center;
-  z-index: 9999;
-  transition: transform 0.3s ease-in-out;
-}
-
-.order-confirm.show {
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.order-confirm .checkmark {
-  font-size: 3rem;
-  color: #28a745;
-  margin-bottom: 12px;
-}
-
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 992px) {
   .product-card {
-    flex: 1 1 calc(50% - 20px); /* 2 per row */
+    flex: 1 1 45%; /* bigger on tablet */
+    max-width: 45%;
   }
 }
 
 @media (max-width: 576px) {
   .product-card {
-    flex: 1 1 100%; /* 1 per row */
-  }
-
-  #searchInput, #sortSelect {
-    flex: 1 1 100%;
-    margin-bottom: 8px;
-  }
-
-  .d-flex.gap-2.mb-3 {
-    flex-direction: column;
+    flex: 1 1 90%; /* almost full width on mobile */
+    max-width: 90%;
   }
 }
