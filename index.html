@@ -1,74 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pâtisseries TouTou</title>
+  <title>Sucré Cristallisé — Chez TouTou</title>
 
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="site-header bg-warning text-dark py-2">
   <div class="container d-flex align-items-center justify-content-between">
     <div class="d-flex align-items-center">
-      <img src="TOUTOU-logo.png" alt="Pâtisseries TouTou logo" class="logo-img me-2" onerror="this.style.display='none'"/>
-      <h1 class="site-title m-0" style="font-family: 'Pacifico', cursive;">Sucré Cristallisé — Chez TouTou</h1>
+      <img src="TOUTOU-logo.png" alt="Logo TouTou" class="logo-img me-2" style="width:56px;height:56px;border-radius:10px;object-fit:cover" onerror="this.style.display='none'"/>
+      <div>
+        <h1 class="site-title m-0">Sucré Cristallisé — Chez TouTou</h1>
+        <div class="text-muted small">Délicieux — Fait maison — Commande par téléphone</div>
+      </div>
     </div>
+
     <div class="d-flex gap-2 align-items-center">
-      <nav class="category-nav" id="categoryNav"></nav>
-      <a href="https://www.facebook.com/profile.php?id=61583931631312" target="_blank" class="text-dark ms-2"><i class="bi bi-facebook fs-4"></i></a>
-      <a href="https://www.instagram.com/sucre_cristallise/" target="_blank" class="text-dark ms-2"><i class="bi bi-instagram fs-4"></i></a>
+      <nav class="category-nav" id="categoryNav" aria-label="Catégories"></nav>
+      <a href="https://www.facebook.com/profile.php?id=61583931631312" target="_blank" rel="noopener noreferrer" class="text-dark ms-2" aria-label="Facebook"><i class="bi bi-facebook fs-4"></i></a>
+      <a href="https://www.instagram.com/sucre_cristallise/" target="_blank" rel="noopener noreferrer" class="text-dark ms-2" aria-label="Instagram"><i class="bi bi-instagram fs-4"></i></a>
     </div>
   </div>
 </header>
 
-<!-- SEARCH & SORT -->
-<div class="container py-3">
-  <div class="d-flex gap-2 mb-3 align-items-center">
-    <input id="searchInput" class="form-control" placeholder="Search items..." />
-    <select id="sortSelect" class="form-select w-auto">
-      <option value="default">Sort</option>
-      <option value="price-asc">Price ↑</option>
-      <option value="price-desc">Price ↓</option>
-      <option value="name-asc">Name A→Z</option>
-    </select>
-  </div>
-</div>
-
-<!-- PRODUCT SECTIONS / SLIDER -->
-<div id="sectionSlider" class="slider-container container">
-  <section class="slider-page" data-page="les-gateau">
-    <h3 class="section-title">Les gâteaux</h3>
-    <div class="row g-3 section-grid" data-section="les-gateau"></div>
+<main class="container py-3">
+  <section class="mb-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-12 col-md-8 d-flex gap-2 mb-2 mb-md-0">
+        <input id="searchInput" class="form-control" placeholder="Rechercher..." aria-label="Recherche" />
+        <select id="sortSelect" class="form-select w-auto" aria-label="Trier">
+          <option value="default">Trier</option>
+          <option value="price-asc">Prix ↑</option>
+          <option value="price-desc">Prix ↓</option>
+          <option value="name-asc">Nom A→Z</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-4 text-md-end">
+        <button class="btn btn-outline-dark" onclick="scrollToCart()"><i class="bi bi-bag-fill"></i> Voir le panier</button>
+      </div>
+    </div>
   </section>
 
-  <section class="slider-page" data-page="halawa-arabi">
-    <h3 class="section-title">حلو عربي</h3>
-    <div class="row g-3 section-grid" data-section="halawa-arabi"></div>
-  </section>
+  <!-- HORIZONTAL SLIDER PAGES -->
+  <div id="sectionSlider" class="slider-container" role="region" aria-label="Sections produits"></div>
 
-  <section class="slider-page" data-page="juice">
-    <h3 class="section-title">Jus</h3>
-    <div class="row g-3 section-grid" data-section="juice"></div>
-  </section>
-
-  <section class="slider-page" data-page="gateau-soiree">
-    <h3 class="section-title">Gâteaux soirée</h3>
-    <div class="row g-3 section-grid" data-section="gateau-soiree"></div>
-  </section>
-</div>
-
-<!-- CART -->
-<main class="container py-4">
-  <div class="mt-4">
+  <!-- CART -->
+  <section id="cartSection" class="mt-4">
     <h4>🛒 9athytek</h4>
-    <div id="cartContainer" class="card p-2">
+    <div id="cartContainer" class="card p-3">
       <div class="table-responsive">
         <table class="table table-sm align-middle mb-0">
           <thead class="table-dark">
@@ -84,7 +72,7 @@
         </table>
       </div>
 
-      <div class="d-flex justify-content-between align-items-center mt-2">
+      <div class="d-flex justify-content-between align-items-center mt-3">
         <div><small class="text-muted">tnjm tkmndi bil talifoun</small></div>
         <div class="d-flex gap-2 align-items-center">
           <h5 class="mb-0">Total: <span id="grandTotal">0.00 TND</span></h5>
@@ -92,16 +80,16 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </main>
 
 <!-- CHECKOUT MODAL -->
-<div class="modal fade" id="checkoutModal" tabindex="-1">
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-warning text-dark">
         <h5 class="modal-title">Confirm Order</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
+        <button class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
       <div class="modal-body">
         <div id="checkoutItems"></div>
@@ -112,19 +100,19 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button class="btn btn-warning" onclick="finalizeOrder()">Confirm</button>
+        <button class="btn btn-warning" id="confirmOrderBtn">Confirm</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ORDER CONFIRM -->
-<div id="orderConfirm" class="order-confirm">
+<!-- Order confirmation widget (animated) -->
+<div id="orderConfirm" class="order-confirm" role="status" aria-live="polite">
   <div class="checkmark">✔</div>
   <h2>Order confirmed — Saha!</h2>
+  <div class="small text-muted">We saved your order locally. Call <strong>27441307</strong> to finalize.</div>
 </div>
 
-<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="main.js"></script>
 </body>
