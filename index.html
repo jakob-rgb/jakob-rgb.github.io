@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pâtisseries TouTou</title>
 
+  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
@@ -12,20 +13,35 @@
 </head>
 <body>
 
-<header class="site-header">
+<!-- HEADER -->
+<header class="site-header bg-warning text-dark py-2">
   <div class="container d-flex align-items-center justify-content-between">
     <div class="d-flex align-items-center">
-      <img src="TOUTOU-logo.png" alt="Pâtisseries TouTou logo" class="logo-img" onerror="this.style.display='none'"/>
-      <h1 class="site-title">Sucré Cristallisé — Chez TouTou</h1>
+      <img src="TOUTOU-logo.png" alt="Pâtisseries TouTou logo" class="logo-img me-2" onerror="this.style.display='none'"/>
+      <h1 class="site-title m-0" style="font-family: 'Pacifico', cursive;">Sucré Cristallisé — Chez TouTou</h1>
     </div>
     <div class="d-flex gap-2 align-items-center">
       <nav class="category-nav" id="categoryNav"></nav>
-      <a href="https://facebook.com" target="_blank" class="text-white ms-2"><i class="bi bi-facebook fs-4"></i></a>
-      <a href="https://instagram.com" target="_blank" class="text-white ms-2"><i class="bi bi-instagram fs-4"></i></a>
+      <a href="https://facebook.com" target="_blank" class="text-dark ms-2"><i class="bi bi-facebook fs-4"></i></a>
+      <a href="https://instagram.com" target="_blank" class="text-dark ms-2"><i class="bi bi-instagram fs-4"></i></a>
     </div>
   </div>
 </header>
 
+<!-- SEARCH & SORT -->
+<div class="container py-3">
+  <div class="d-flex gap-2 mb-3 align-items-center">
+    <input id="searchInput" class="form-control" placeholder="Search items..." />
+    <select id="sortSelect" class="form-select w-auto">
+      <option value="default">Sort</option>
+      <option value="price-asc">Price ↑</option>
+      <option value="price-desc">Price ↓</option>
+      <option value="name-asc">Name A→Z</option>
+    </select>
+  </div>
+</div>
+
+<!-- PRODUCT SECTIONS / SLIDER -->
 <div id="sectionSlider" class="slider-container container">
   <section class="slider-page" data-page="les-gateau">
     <h3 class="section-title">Les gâteaux</h3>
@@ -48,18 +64,8 @@
   </section>
 </div>
 
+<!-- CART -->
 <main class="container py-4">
-  <div class="d-flex gap-2 mb-3 align-items-center">
-    <input id="searchInput" class="form-control" placeholder="Search items..." />
-    <select id="sortSelect" class="form-select w-auto">
-      <option value="default">Sort</option>
-      <option value="price-asc">Price ↑</option>
-      <option value="price-desc">Price ↓</option>
-      <option value="name-asc">Name A→Z</option>
-    </select>
-  </div>
-
-  <!-- CART -->
   <div class="mt-4">
     <h4>🛒 9athytek</h4>
     <div id="cartContainer" class="card p-2">
@@ -118,6 +124,7 @@
   <h2>Order confirmed — Saha!</h2>
 </div>
 
+<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="main.js"></script>
 </body>
