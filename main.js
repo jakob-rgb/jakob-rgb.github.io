@@ -13,8 +13,8 @@
     { id: 1, name: "Gâteau chocolat", price: 40.00, img: "images/gt Chocolat.jpg", category: "les-gateau" },
     { id: 2, name: "Gâteau pistache", price: 40.00, img: "images/gt pistache.jpg", category: "les-gateau" },
     { id: 2, name: "Gâteau fraise", price: 40.00, img: "images/gt fraise.jpg", category: "les-gateau" },
-    { id: 3, name: "Makroud", price: 4.00, img: "images/makroud.jpg", category: "halawa-arabi" },
-    { id: 4, name: "Zlabia", price: 3.50, img: "images/zlabia.jpg", category: "halawa-arabi" },
+    { id: 3, name: "Makroud", price: 4.00, img: "images/makroud.jpg", category: "حلو عربي" },
+    { id: 4, name: "Zlabia", price: 3.50, img: "images/zlabia.jpg", category: "حلو عربي" },
     { id: 5, name: "Jus Orange", price: 2.50, img: "images/jus-orange.jpg", category: "juice" },
     { id: 6, name: "Soirée chocolat", price: 15.00, img: "images/soiree-choco.jpg", category: "gateau-soiree" }
   ];
@@ -25,7 +25,7 @@
   // SECTIONS
   const sections = {
     'les-gateau': document.querySelector('[data-section="les-gateau"]'),
-    'halawa-arabi': document.querySelector('[data-section="halawa-arabi"]'),
+    'halawa-arabi': document.querySelector('[data-section="حلو عربي"]'),
     'juice': document.querySelector('[data-section="juice"]'),
     'gateau-soiree': document.querySelector('[data-section="gateau-soiree"]')
   };
