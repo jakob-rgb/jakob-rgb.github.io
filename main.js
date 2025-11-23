@@ -89,7 +89,8 @@
 
       if (p.img) {
         const img = document.createElement('img');
-        img.src = p.img;
+        // encode path so spaces and other chars work
+        img.src = encodeURI(p.img);
         img.alt = p.name;
         img.loading = 'lazy';
         img.className = 'product-img';
@@ -180,7 +181,6 @@
   }
 
   function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-  function fmt(n){ return Number(n).toFixed(2); }
 
   function prepareCheckout(){
     clearChildren(checkoutItems);
@@ -204,8 +204,10 @@
     cart = []; persistCart(); renderCart();
     // feedback
     const orderConfirmEl = document.getElementById('orderConfirm');
-    orderConfirmEl.classList.add('show');
-    setTimeout(()=> orderConfirmEl.classList.remove('show'), 1900);
+    if (orderConfirmEl) {
+      orderConfirmEl.classList.add('show');
+      setTimeout(()=> orderConfirmEl.classList.remove('show'), 1900);
+    }
     alert('Order saved locally. Call 27441307 to confirm.');
   }
 
@@ -214,7 +216,20 @@
     const el = document.createElement('div');
     el.className = 'toast-bubble';
     el.textContent = text;
-    Object.assign(el.style, { position:'fixed', left:'50%', transform:'translateX(-50%)', bottom:'28px', background:'rgba(20,20,20,0.9)', color:'#fff', padding:'10px 14px', borderRadius:'10px', zIndex:1100 });
+    Object.assign(el.style, {
+      position: 'fixed',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      bottom: '28px',
+      background: 'rgba(20,20,20,0.9)',
+      color: '#fff',
+      padding: '10px 14px',
+      borderRadius: '10px',
+      zIndex: 9999,
+      transition: 'opacity 250ms',
+      opacity: '1',
+      pointerEvents: 'none'
+    });
     document.body.appendChild(el);
     setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(),250); }, 1100);
   }
@@ -249,18 +264,20 @@ catBtns.forEach(btn => {
     // hide all sections
     allSections.forEach(sec => {
       sec.classList.remove('visible');
-      sec.parentElement.style.display = 'none';
+      if (sec.parentElement) sec.parentElement.style.display = 'none';
     });
 
     // show only selected section
     const selectedSec = document.querySelector(`[data-section="${target}"]`);
-    selectedSec.parentElement.style.display = 'block';
+    if (selectedSec && selectedSec.parentElement) {
+      selectedSec.parentElement.style.display = 'block';
 
-    // animate
-    setTimeout(() => selectedSec.classList.add('visible'), 50);
+      // animate
+      setTimeout(() => selectedSec.classList.add('visible'), 50);
 
-    // smooth scroll
-    selectedSec.parentElement.scrollIntoView({ behavior: "smooth" });
+      // smooth scroll
+      selectedSec.parentElement.scrollIntoView({ behavior: "smooth" });
+    }
   });
 });
 
@@ -276,10 +293,10 @@ function goToPage(pageName) {
   const index = [...pages].findIndex(p => p.dataset.page === pageName);
   if (index === -1) return;
 
-  slider.style.transform = `translateX(-${index * 100}%)`;
+  if (slider) slider.style.transform = `translateX(-${index * 100}%)`;
 
   pages.forEach(p => p.classList.remove('active'));
-  pages[index].classList.add('active');
+  if (pages[index]) pages[index].classList.add('active');
 }
 
 // category button clicks
