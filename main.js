@@ -25,7 +25,7 @@
   // SECTIONS
   const sections = {
     'les-gateau': document.querySelector('[data-section="les-gateau"]'),
-    'halawa-arabi': document.querySelector('[data-section="حلو عربي"]'),
+    'حلو عربي': document.querySelector('[data-section="حلو عربي"]'),
     'juice': document.querySelector('[data-section="juice"]'),
     'gateau-soiree': document.querySelector('[data-section="gateau-soiree"]')
   };
