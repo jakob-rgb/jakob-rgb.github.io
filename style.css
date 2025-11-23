@@ -1,80 +1,43 @@
-/* ---------- PRODUCT CARDS ---------- */
-.section-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-top: 15px;
-  justify-content: center; /* center the cards */
+:root{
+  --accent:#ff8c42;
+  --accent-2:#ffbf69;
+  --bg:#fff8f3;
+  --card-shadow: 0 6px 20px rgba(16,16,16,0.12);
 }
+html,body{height:100%;background:linear-gradient(180deg,#fff 0%, #fff8f3 100%);font-family:Roboto,system-ui,'Segoe UI',sans-serif;color:#222}
+.site-header{backdrop-filter: blur(4px);box-shadow: 0 2px 8px rgba(0,0,0,0.06)}
+.site-title{font-family:'Pacifico',cursive;font-size:1.5rem}
 
-.product-card {
-  flex: 1 1 300px;       /* min width 300px, will expand */
-  max-width: 350px;      /* max width */
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px;
-  transition: transform 0.2s;
-}
+/* Category nav */
+.category-nav{display:flex;gap:.5rem;align-items:center}
+.cat-btn{background:transparent;border:1px solid transparent;padding:.35rem .6rem;border-radius:999px;cursor:pointer}
+.cat-btn.active{background:var(--accent);color:#fff;border-color:rgba(0,0,0,0.06);box-shadow:var(--card-shadow)}
 
-.product-card:hover {
-  transform: translateY(-5px);
-}
+/* Horizontal slider (snap) */
+.slider-container{display:flex;gap:1.2rem;overflow-x:auto;padding:1rem 0;scroll-snap-type:x mandatory;scroll-behavior:smooth}
+.slider-page{flex:0 0 92%;max-width:920px;background:rgba(255,255,255,0.95);border-radius:14px;padding:18px;box-shadow:var(--card-shadow);scroll-snap-align:center}
+.section-title{font-weight:600;margin-bottom:10px}
 
-.product-card img {
-  width: 100%;
-  height: 250px;       /* taller image */
-  object-fit: cover;
-  border-radius: 10px;
-  margin-bottom: 12px;
-}
+/* Product grid inside page */
+.section-grid{display:flex;flex-wrap:wrap;gap:18px;margin-top:8px;justify-content:center}
+.product-card{flex:1 1 260px;max-width:300px;background:#fff;border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;transition:transform .18s ease,box-shadow .18s}
+.product-card:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(16,16,16,0.12)}
+.product-img{width:100%;height:190px;object-fit:cover;border-radius:8px;margin-bottom:10px}
+.price-badge{background:var(--accent-2);color:#333;padding:.35rem .6rem;border-radius:8px;font-weight:600;margin-bottom:8px}
+.title{font-size:1.05rem;text-align:center;margin:6px 0}
+.btn-cta{width:100%;background:var(--accent);color:#fff;border:none;padding:.55rem;border-radius:8px;font-weight:600}
 
-.product-card h5 {
-  font-size: 1.3rem;   /* bigger title */
-  margin-bottom: 8px;
-  text-align: center;
-}
+/* Cart card */
+.order-confirm{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.85);background:linear-gradient(135deg,#fff,#fffbf5);padding:22px;border-radius:14px;box-shadow:0 12px 40px rgba(16,16,16,0.12);display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0;pointer-events:none;transition:all .35s}
+.order-confirm.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.order-confirm .checkmark{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,var(--accent),#ffb27a);color:#fff;font-size:34px;box-shadow:0 8px 22px rgba(255,140,66,0.25)}
 
-.product-card .price-badge {
-  background: #ffbf69;
-  color: #333;
-  padding: 6px 12px;  /* bigger badge */
-  border-radius: 8px;
-  font-weight: 500;
-  margin-bottom: 12px;
-}
+/* Toast */
+.toast-bubble{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:rgba(20,20,20,0.92);color:#fff;padding:10px 14px;border-radius:999px;z-index:9999}
 
-.btn-cta {
-  width: 100%;
-  background: #ff8c42;
-  color: #fff;
-  border: none;
-  padding: 10px 0;    /* bigger button */
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 1rem;    /* larger text */
-  transition: 0.2s;
-}
-
-.btn-cta:hover {
-  background: #ff9f5a;
-}
-
-/* ---------- RESPONSIVE ---------- */
-@media (max-width: 992px) {
-  .product-card {
-    flex: 1 1 45%; /* bigger on tablet */
-    max-width: 45%;
-  }
-}
-
-@media (max-width: 576px) {
-  .product-card {
-    flex: 1 1 90%; /* almost full width on mobile */
-    max-width: 90%;
-  }
+/* Responsive tweaks */
+@media (max-width:768px){
+  .site-title{font-size:1.25rem}
+  .slider-page{flex:0 0 96%}
+  .product-img{height:160px}
 }
