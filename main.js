@@ -10,7 +10,7 @@
 
   // PRODUCTS (use /images/ folder, no uploader needed)
   const products = [
-    { id: 1, name: "Gâteau chocolat", price: 40.50, img: "images/gt-chocolat.jpg", category: "les-gateau" },
+    { id: 1, name: "Gâteau chocolat", price: 40.50, img: "images/gt Chocolat.jpg", category: "les-gateau" },
     { id: 2, name: "Opéra", price: 12.00, img: "images/opera.jpg", category: "les-gateau" },
     { id: 3, name: "Makroud", price: 4.00, img: "images/makroud.jpg", category: "halawa-arabi" },
     { id: 4, name: "Zlabia", price: 3.50, img: "images/zlabia.jpg", category: "halawa-arabi" },
