@@ -1,116 +1,92 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Sucré Cristallisé — Chez TouTou</title>
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
-<link rel="stylesheet" href="style.css" />
-</head>
-<body>
 
-<header class="site-header bg-dark text-white py-3">
-  <div class="container d-flex align-items-center justify-content-between">
-    <div class="d-flex align-items-center gap-3">
-      <img src="TOUTOU-logo.png" alt="Logo TouTou" class="rounded" style="width:60px;height:60px;object-fit:cover;" onerror="this.style.display='none'"/>
-      <div>
-        <h2 class="m-0" style="font-family:Pacifico;">Sucré Cristallisé</h2>
-        <small class="text-warning">Chez TouTou — Fait maison</small>
-      </div>
-    </div>
-    <div class="d-flex align-items-center gap-3">
-      <nav id="categoryNav" class="d-none d-md-flex gap-2"></nav>
-      <button class="btn btn-dark" onclick="scrollToCart()"><i class="bi bi-bag"></i> Voir le panier</button>
-      <a href="https://www.facebook.com" target="_blank" class="text-white fs-4"><i class="bi bi-facebook"></i></a>
-      <a href="https://www.instagram.com" target="_blank" class="text-white fs-4"><i class="bi bi-instagram"></i></a>
-    </div>
-  </div>
-</header>
-
-<main class="container py-3">
-  <!-- Search and sort -->
-  <section class="mb-3">
-    <div class="row g-2 align-items-center">
-      <div class="col-md-8 d-flex gap-2 mb-2 mb-md-0">
-        <input id="searchInput" class="form-control" placeholder="Rechercher...">
-        <select id="sortSelect" class="form-select w-auto">
-          <option value="default">Trier</option>
-          <option value="price-asc">Prix ↑</option>
-          <option value="price-desc">Prix ↓</option>
-          <option value="name-asc">Nom A→Z</option>
-        </select>
-      </div>
-      <div class="col-md-4 text-md-end">
-        <button class="btn btn-warning" onclick="scrollToCart()">Voir le panier</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Product slider -->
-  <div id="sectionSlider" class="slider-container"></div>
-
-  <!-- Cart -->
-  <section id="cartSection" class="mt-4">
-    <h3>🛒 Votre panier</h3>
-    <div class="table-responsive">
-      <table class="table table-striped">
-        <thead class="table-dark">
-          <tr>
-            <th>Produit</th>
-            <th class="text-end">Prix</th>
-            <th>Qté</th>
-            <th class="text-end">Total</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="cartBody"></tbody>
-      </table>
-    </div>
-    <div class="d-flex justify-content-between align-items-center mt-3">
-      <h4>Total : <span id="grandTotal">0.00 TND</span></h4>
-      <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#checkoutModal" onclick="prepareCheckout()">Commander maintenant</button>
-    </div>
-  </section>
-</main>
-
-<!-- Checkout modal -->
-<div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-warning text-dark">
-        <h5 class="modal-title">Confirmer la commande</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div id="checkoutItems"></div>
-        <h5 class="text-end mt-3">Total: <span id="checkoutTotal">0.00 TND</span></h5>
-        <div class="alert alert-info mt-3">
-          Appelez <strong>27441307</strong> pour confirmer.
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-        <button class="btn btn-warning" id="confirmOrderBtn">Confirmer</button>
-      </div>
-    </div>
-  </div>
+<!DOCTYPE html>  <html lang="fr">  
+<head>  
+  <meta charset="utf-8" />  
+  <meta name="viewport" content="width=device-width,initial-scale=1" />  
+  <title>Sucré Cristallisé — Chez TouTou</title>    <!-- Fonts & Icons -->    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>    <link rel="stylesheet" href="style.css" />  
+</head>  
+<body>  <header class="site-header bg-warning text-dark py-2">  
+  <div class="container d-flex align-items-center justify-content-between">  
+    <div class="d-flex align-items-center">  
+      <img src="TOUTOU-logo.png" alt="Logo TouTou" class="logo-img me-2" style="width:56px;height:56px;border-radius:10px;object-fit:cover" onerror="this.style.display='none'"/>  
+      <div>  
+        <h1 class="site-title m-0">Sucré Cristallisé — Chez TouTou</h1>  
+        <div class="text-muted small">Délicieux — Fait maison — Commande par téléphone</div>  
+      </div>  
+    </div>  <div class="d-flex gap-2 align-items-center">  
+  <nav class="category-nav" id="categoryNav" aria-label="Catégories"></nav>  
+  <a href="https://www.facebook.com/profile.php?id=61583931631312" target="_blank" rel="noopener noreferrer" class="text-dark ms-2" aria-label="Facebook"><i class="bi bi-facebook fs-4"></i></a>  
+  <a href="https://www.instagram.com/sucre_cristallise/" target="_blank" rel="noopener noreferrer" class="text-dark ms-2" aria-label="Instagram"><i class="bi bi-instagram fs-4"></i></a>  
 </div>
 
-<!-- Order confirmation -->
-<div id="orderConfirm" class="order-confirm">
-  <div class="checkmark">✔</div>
-  <h2>Commande confirmée !</h2>
-  <div class="small text-muted">Commande sauvegardée localement.</div>
+  </div>  
+</header>  <main class="container py-3">  
+  <section class="mb-3">  
+    <div class="row g-2 align-items-center">  
+      <div class="col-12 col-md-8 d-flex gap-2 mb-2 mb-md-0">  
+        <input id="searchInput" class="form-control" placeholder="Rechercher..." aria-label="Recherche" />  
+        <select id="sortSelect" class="form-select w-auto" aria-label="Trier">  
+          <option value="default">Trier</option>  
+          <option value="price-asc">Prix ↑</option>  
+          <option value="price-desc">Prix ↓</option>  
+          <option value="name-asc">Nom A→Z</option>  
+        </select>  
+      </div>  
+      <div class="col-12 col-md-4 text-md-end">  
+        <button class="btn btn-outline-dark" onclick="scrollToCart()"><i class="bi bi-bag-fill"></i> Voir le panier</button>  
+      </div>  
+    </div>  
+  </section>    <!-- HORIZONTAL SLIDER PAGES -->    <div id="sectionSlider" class="slider-container" role="region" aria-label="Sections produits"></div>    <!-- CART -->    <section id="cartSection" class="mt-4">  
+    <h4>🛒 9athytek</h4>  
+    <div id="cartContainer" class="card p-3">  
+      <div class="table-responsive">  
+        <table class="table table-sm align-middle mb-0">  
+          <thead class="table-dark">  
+            <tr>  
+              <th>Item</th>  
+              <th class="text-end">Prix</th>  
+              <th>Qty</th>  
+              <th class="text-end">Total</th>  
+              <th></th>  
+            </tr>  
+          </thead>  
+          <tbody id="cartBody"></tbody>  
+        </table>  
+      </div>  <div class="d-flex justify-content-between align-items-center mt-3">  
+    <div><small class="text-muted">tnjm tkmndi bil talifoun</small></div>  
+    <div class="d-flex gap-2 align-items-center">  
+      <h5 class="mb-0">Total: <span id="grandTotal">0.00 TND</span></h5>  
+      <button class="btn btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#checkoutModal" onclick="prepareCheckout()">kmandi taw</button>  
+    </div>  
+  </div>  
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="main.js"></script>
-<script>
-function scrollToCart(){
-  document.getElementById('cartSection').scrollIntoView({behavior:'smooth'});
-}
-</script>
-</body>
-</html>
+  </section>  
+</main>  <!-- CHECKOUT MODAL -->  <div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true">  
+  <div class="modal-dialog modal-dialog-centered">  
+    <div class="modal-content">  
+      <div class="modal-header bg-warning text-dark">  
+        <h5 class="modal-title">Confirm Order</h5>  
+        <button class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>  
+      </div>  
+      <div class="modal-body">  
+        <div id="checkoutItems"></div>  
+        <h5 class="text-end mt-3">Total: <span id="checkoutTotal">0.00 TND</span></h5>  
+        <div class="alert alert-info mt-3">  
+          Otlob <strong>27441307</strong> bach tikmandi.  
+        </div>  
+      </div>  
+      <div class="modal-footer">  
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>  
+        <button class="btn btn-warning" id="confirmOrderBtn">Confirm</button>  
+      </div>  
+    </div>  
+  </div>  
+</div>  <!-- Order confirmation widget (animated) -->  <div id="orderConfirm" class="order-confirm" role="status" aria-live="polite">  
+  <div class="checkmark">✔</div>  
+  <h2>Order confirmed — Saha!</h2>  
+  <div class="small text-muted">We saved your order locally. Call <strong>27441307</strong> to finalize.</div>  
+</div>  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>  <script src="main.js"></script>  </body>  
+</html>  
